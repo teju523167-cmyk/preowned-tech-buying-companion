@@ -1,0 +1,11 @@
+import express from "express";
+import { protect } from "../middleware/authMiddleware.js";
+import { requireVerifiedEmail } from "../middleware/requireVerifiedEmail.js";
+import { authorizeRoles } from "../middleware/roleMiddleware.js";
+import { contactRateLimit } from "../middleware/contactRateLimit.js";
+import { semanticDiscovery, specificationAnswer, comparisonAgent } from "../controllers/aiController.js";
+const router = express.Router();
+router.post("/ai/discovery", protect, requireVerifiedEmail, authorizeRoles("buyer"), contactRateLimit, semanticDiscovery);
+router.post("/ai/specifications", protect, requireVerifiedEmail, authorizeRoles("buyer"), contactRateLimit, specificationAnswer);
+router.post("/comparison-agent", protect, requireVerifiedEmail, authorizeRoles("buyer"), contactRateLimit, comparisonAgent);
+export default router;
