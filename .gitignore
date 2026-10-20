@@ -1,0 +1,10 @@
+
+node_modules/
+frontend/dist/
+.npm-cache/
+.env
+.env.*
+!.env.example
+private-evidence/
+coverage/
+*.log
