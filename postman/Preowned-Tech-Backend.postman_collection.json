@@ -1,0 +1,854 @@
+{
+  "info": {
+    "name": "Preowned Tech Buying Companion — API",
+    "description": "Marketplace and AI API requests. Set baseUrl to http://localhost:4000. Enable Postman cookie jar. Login rotates the session; fetch CSRF again after login. Configure Atlas Vector Search and Ollama before AI requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "csrfToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/",
+        "description": ""
+      }
+    },
+    {
+      "name": "Get CSRF token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/csrf-token",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.csrfToken) pm.collectionVariables.set(\"csrfToken\", data.csrfToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register buyer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Sample Buyer\",\n  \"email\": \"buyer@example.com\",\n  \"password\": \"ChangeThisPassword123\",\n  \"role\": \"buyer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Development email inbox",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/dev-email-inbox?email=buyer@example.com",
+        "description": ""
+      }
+    },
+    {
+      "name": "Verify email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/verify-email",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_DEV_INBOX\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"buyer@example.com\",\n  \"password\": \"ChangeThisPassword123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get CSRF token after login",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/csrf-token",
+        "description": ""
+      }
+    },
+    {
+      "name": "Current user",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/me",
+        "description": ""
+      }
+    },
+    {
+      "name": "Public listing search",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/listings?category=laptop&minPrice=10000&maxPrice=50000&page=1&limit=10",
+        "description": ""
+      }
+    },
+    {
+      "name": "Create listing (seller session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Sample Laptop\",\n  \"description\": \"Used laptop with disclosed minor scratches.\",\n  \"brand\": \"Dell\",\n  \"category\": \"laptop\",\n  \"condition\": \"good\",\n  \"price\": 25000,\n  \"images\": [],\n  \"specifications\": {\n    \"modelName\": \"Latitude 5420\",\n    \"processor\": \"Intel Core i5\",\n    \"memoryGB\": 16,\n    \"storageGB\": 512,\n    \"storageType\": \"SSD\",\n    \"graphics\": \"Integrated graphics\",\n    \"displaySizeInches\": 14,\n    \"connectivity\": [\n      \"Wi-Fi\",\n      \"Bluetooth\"\n    ]\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get my listings (seller session required)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/listings/my",
+        "description": ""
+      }
+    },
+    {
+      "name": "Get shortlist",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/shortlists",
+        "description": ""
+      }
+    },
+    {
+      "name": "Add listing to shortlist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/shortlists",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"listingId\": \"PASTE_APPROVED_LISTING_ID\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Ask listing question (buyer session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_APPROVED_LISTING_ID/questions",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"Are the original charger and purchase receipt available?\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Create viewing request (buyer session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_APPROVED_LISTING_ID/viewings",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"proposedDate\": \"2030-01-01T10:00:00.000Z\",\n  \"message\": \"Please confirm if this time is suitable.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "My questions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/questions/my",
+        "description": ""
+      }
+    },
+    {
+      "name": "My viewing requests",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/viewings/my",
+        "description": ""
+      }
+    },
+    {
+      "name": "My buyer chat messages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/buyer-chat?listingId=PASTE_APPROVED_LISTING_ID&otherUserId=PASTE_SELLER_ID",
+        "description": ""
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/logout",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Forgot password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/forgot-password",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"buyer@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Reset password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/reset-password",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"PASTE_RESET_TOKEN_FROM_DEV_INBOX\",\n  \"password\": \"NewChangeThisPassword123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get buyer preferences",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/preferences"
+      }
+    },
+    {
+      "name": "Save buyer preferences",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/preferences",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"useCase\": \"Coding and light photo editing\",\n  \"budgetMin\": 15000,\n  \"budgetMax\": 40000,\n  \"preferredCategories\": [\n    \"laptop\"\n  ],\n  \"preferredBrands\": [\n    \"Dell\",\n    \"Lenovo\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Report a listing",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_APPROVED_LISTING_ID/reports",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"The seller description appears inconsistent with the listed specifications.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Mark own approved listing sold (seller session required)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_APPROVED_LISTING_ID/sold",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Moderator listing queue (moderator session required)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/moderator/listings?status=pending_review"
+      }
+    },
+    {
+      "name": "Approve listing (moderator session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_LISTING_ID/moderation",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"approved\",\n  \"reason\": \"Required listing details and submitted evidence metadata reviewed.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Moderator pending reports (moderator session required)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/moderator/reports?status=pending"
+      }
+    },
+    {
+      "name": "Review report (moderator session required)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/moderator/reports/PASTE_REPORT_ID",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"reviewed\",\n  \"note\": \"Reviewed listing and recorded the decision.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Create moderator invitation (moderator session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/moderator/invitations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"new.moderator@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Accept moderator invitation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/accept-invitation",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"PASTE_INVITATION_TOKEN\",\n  \"name\": \"New Moderator\",\n  \"password\": \"ChangeThisPassword123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Seller viewing requests",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/viewings/received"
+      }
+    },
+    {
+      "name": "Seller accepts viewing request",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/viewings/PASTE_VIEWING_ID/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"accepted\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Seller received questions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/questions/received"
+      }
+    },
+    {
+      "name": "Seller answers a question",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/questions/PASTE_QUESTION_ID/answer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"answer\": \"Yes, the charger is included.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Moderator evidence metadata",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/moderator/listings/PASTE_LISTING_ID/evidence"
+      }
+    },
+    {
+      "name": "Review evidence metadata",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/moderator/evidence/PASTE_EVIDENCE_ID",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"accepted\",\n  \"reason\": \"Document metadata reviewed; authenticity is not certified.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Change user role",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/moderator/users/PASTE_USER_ID/role",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"seller\",\n  \"reason\": \"Role correction approved by moderator.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Revoke membership",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/moderator/users/PASTE_USER_ID/revoke",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Membership revoked following moderation review.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Upload private evidence file (seller session required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/pdf"
+          },
+          {
+            "key": "x-evidence-type",
+            "value": "proof_of_ownership"
+          },
+          {
+            "key": "x-file-name",
+            "value": "proof.pdf"
+          },
+          {
+            "key": "x-evidence-notes",
+            "value": "Proof provided by seller."
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/listings/PASTE_OWN_LISTING_ID/evidence/file",
+        "description": "In Postman choose Body > binary and select a PDF/JPEG/PNG file (max 5 MB). The Content-Type must match the selected file."
+      }
+    },
+    {
+      "name": "AI semantic discovery",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Laptop under ₹50,000 with at least 16GB RAM and 512GB storage for college coding\",\n  \"budget\": 50000\n}"
+        },
+        "url": "{{baseUrl}}/api/ai/discovery",
+        "description": "Requires verified buyer login. Semantic retrieval uses listing_vector_index and reports missing specifications."
+      }
+    },
+    {
+      "name": "AI specification RAG",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"listingId\": \"PASTE_APPROVED_LISTING_ID\",\n  \"question\": \"Can this device support a memory upgrade?\"\n}"
+        },
+        "url": "{{baseUrl}}/api/ai/specifications",
+        "description": "Requires verified buyer login and indexed source excerpts; citations are limited to retrieved sources."
+      }
+    },
+    {
+      "name": "AI comparison agent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"needs\": \"Compare coding laptops for college\",\n  \"budget\": 50000\n}"
+        },
+        "url": "{{baseUrl}}/api/comparison-agent",
+        "description": "Requires verified buyer login. Uses findListings, compareSpecifications, and inspectDisclosures; never contacts sellers or books viewings."
+      }
+    },
+    {
+      "name": "Share seller specification excerpt",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-csrf-token",
+            "value": "{{csrfToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Device manual excerpt\",\n  \"section\": \"Memory\",\n  \"page\": 12,\n  \"text\": \"Paste at least 80 characters of a relevant readable excerpt from a source you may share. Do not include receipts, serial numbers, or private evidence.\",\n  \"shareWithBuyers\": true\n}"
+        },
+        "url": "{{baseUrl}}/api/listings/PASTE_OWN_LISTING_ID/ai-sources",
+        "description": "Seller-owned listing only. Explicitly shared excerpts are labeled seller claims."
+      }
+    }
+  ]
+}
